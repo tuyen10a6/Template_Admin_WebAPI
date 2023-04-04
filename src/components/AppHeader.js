@@ -32,19 +32,19 @@ const AppHeader = () => {
           <CIcon icon={cilMenu} size="lg" />
         </CHeaderToggler>
         <CHeaderBrand className="mx-auto d-md-none" to="/">
-          <CIcon icon={logo} height={48} alt="Logo" />
+          <h1 style={{ color: 'red' }}> CLICKBUY</h1>
         </CHeaderBrand>
         <CHeaderNav className="d-none d-md-flex me-auto">
           <CNavItem>
             <CNavLink to="/dashboard" component={NavLink}>
-              Dashboard
+              Tổng quan
             </CNavLink>
           </CNavItem>
-          <CNavItem>
+          {/* <CNavItem>
             <CNavLink href="#">Users</CNavLink>
-          </CNavItem>
+          </CNavItem> */}
           <CNavItem>
-            <CNavLink href="#">Settings</CNavLink>
+            <CNavLink href="#">Cài đặt</CNavLink>
           </CNavItem>
         </CHeaderNav>
         <CHeaderNav>
