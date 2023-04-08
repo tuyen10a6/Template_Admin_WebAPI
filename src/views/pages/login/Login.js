@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import axios from 'axios'
 import {
   CButton,
   CCard,
@@ -17,6 +18,31 @@ import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 
 const Login = () => {
+  const userName = 'Tuyenchelsea'
+  const password = 'Tuyen10a6'
+
+  // Gọi API bằng axios
+  axios
+    .post(
+      `https://localhost:7014/api/CheckUser/CheckUser?UserName=${userName}&Password=${password}`,
+    )
+    .then((response) => {
+      // Xử lý dữ liệu trả về từ API
+      const token = response.data
+      localStorage.setItem('token', token)
+      console.log(token)
+      const isAuthenticated = !!localStorage.getItem('token')
+      axios.get('https://localhost:7014/api/SanPham/GetAllSanPham/10/1', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
+    })
+    .catch((error) => {
+      // Xử lý lỗi
+      console.error(error)
+    })
+
   return (
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center">
       <CContainer>
@@ -26,7 +52,7 @@ const Login = () => {
               <CCard className="p-4">
                 <CCardBody>
                   <CForm>
-                    <h1>Login</h1>
+                    <h1>Đăng Nhập</h1>
                     <p className="text-medium-emphasis">Sign In to your account</p>
                     <CInputGroup className="mb-3">
                       <CInputGroupText>

@@ -6,6 +6,9 @@ import { GrUpdate } from 'react-icons/gr'
 import { AiFillDelete } from 'react-icons/ai'
 import Pagination from 'react-bootstrap/Pagination'
 import Table from 'react-bootstrap/Table'
+import Button from 'react-bootstrap/Button'
+import Form from 'react-bootstrap/Form'
+import Modal from 'react-bootstrap/Modal'
 import {
   CCard,
   CCardBody,
@@ -27,6 +30,12 @@ const Accordion = () => {
   const [pageSize, setPageSize] = useState(5)
   const [totalPages, setTotalPages] = useState(1)
 
+  //
+  const [show, setShow] = useState(false)
+
+  const handleClose = () => setShow(false)
+  const handleShow = () => setShow(true)
+
   useEffect(() => {
     async function fetchDataProduct() {
       const response = await fetch(
@@ -42,6 +51,27 @@ const Accordion = () => {
   function handlePageChange(page) {
     if (page !== totalPages) {
       setPageNumber(page)
+    }
+  }
+  function handleDeleteProduct(productId) {
+    if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+      fetch(`https://localhost:7014/api/SanPham/DeleteSanPham/${productId}`, {
+        method: 'DELETE',
+      })
+        .then((response) => {
+          if (response.ok) {
+            // Update the list of products or perform other actions as needed
+            console.log(`Product with ID ${productId} deleted successfully`)
+            alert('Thành công')
+            setDataProduct((prevData) => prevData.filter((item) => item.productID !== productId))
+          } else {
+            console.error(`Failed to delete product with ID ${productId}`)
+            alert('Không thể xóa sản phẩm này vì đã sản phẩm đã có trong đơn hàng')
+          }
+        })
+        .catch((error) => {
+          console.error(`Không thể xóa sản phẩm có mã ${productId}:`, error)
+        })
     }
   }
 
@@ -80,8 +110,40 @@ const Accordion = () => {
                       <td> {new Date(item.dateCreated).toLocaleDateString('vi-VN')}</td>
 
                       <td>
-                        <GrUpdate className="Icon-update" />
-                        <AiFillDelete className="Icon-delete" />
+                        <GrUpdate variant="primary" onClick={handleShow} className="Icon-update" />
+                        <Modal style={{ background: 'none' }} show={show} onHide={handleClose}>
+                          <Modal.Header closeButton>
+                            <Modal.Title>Sửa sản phẩm</Modal.Title>
+                          </Modal.Header>
+                          <Modal.Body>
+                            <Form>
+                              <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                <Form.Label>Email address</Form.Label>
+                                <Form.Control
+                                  type="email"
+                                  placeholder="name@example.com"
+                                  autoFocus
+                                />
+                              </Form.Group>
+                              <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                                <Form.Label>Example textarea</Form.Label>
+                                <Form.Control as="textarea" rows={3} />
+                              </Form.Group>
+                            </Form>
+                          </Modal.Body>
+                          <Modal.Footer>
+                            <Button variant="secondary" onClick={handleClose}>
+                              Đóng
+                            </Button>
+                            <Button variant="primary" onClick={handleClose}>
+                              Lưu
+                            </Button>
+                          </Modal.Footer>
+                        </Modal>
+                        <AiFillDelete
+                          className="Icon-delete"
+                          onClick={() => handleDeleteProduct(item.productID)}
+                        />
                       </td>
                     </tr>
                   )
