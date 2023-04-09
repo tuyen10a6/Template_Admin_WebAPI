@@ -34,7 +34,23 @@ const Accordion = () => {
   const [show, setShow] = useState(false)
 
   const handleClose = () => setShow(false)
-  const handleShow = () => setShow(true)
+  // Tạo state lưu trữ toàn bộ loại sản phẩm
+
+  const [category, setcategory] = useState([])
+  useEffect(() => {
+    fetch('https://localhost:7014/apiUser/Categories/GetAllCategories')
+      .then((res) => res.json())
+      .then((data) => {
+        setcategory(data)
+        console.log('Call Api GetAllCategory Successfully')
+      })
+  }, [])
+
+  const [selectedProduct, setSelectedProduct] = useState(null)
+  const handleShow = (product) => {
+    setSelectedProduct(product)
+    setShow(true)
+  }
 
   useEffect(() => {
     async function fetchDataProduct() {
@@ -48,13 +64,24 @@ const Accordion = () => {
     fetchDataProduct()
   }, [pageNumber, pageSize])
 
+  /// Image Product Change
+  const [imageSrc, setImageSrc] = useState(null)
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      setImageSrc(event.target.result)
+    }
+    reader.readAsDataURL(file)
+  }
+
   function handlePageChange(page) {
     if (page !== totalPages) {
       setPageNumber(page)
     }
   }
   function handleDeleteProduct(productId) {
-    if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+    if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này? Xóa sẽ bị mất toàn bộ dữ liệu')) {
       fetch(`https://localhost:7014/api/SanPham/DeleteSanPham/${productId}`, {
         method: 'DELETE',
       })
@@ -110,7 +137,11 @@ const Accordion = () => {
                       <td> {new Date(item.dateCreated).toLocaleDateString('vi-VN')}</td>
 
                       <td>
-                        <GrUpdate variant="primary" onClick={handleShow} className="Icon-update" />
+                        <GrUpdate
+                          variant="primary"
+                          onClick={() => handleShow(item)}
+                          className="Icon-update"
+                        />
                         <Modal style={{ background: 'none' }} show={show} onHide={handleClose}>
                           <Modal.Header closeButton>
                             <Modal.Title>Sửa sản phẩm</Modal.Title>
@@ -119,24 +150,73 @@ const Accordion = () => {
                             <Form>
                               <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                 <Form.Label>Tên sản phẩm</Form.Label>
-                                <Form.Control type="text" placeholder="" autoFocus />
+                                <Form.Control
+                                  id="Text_ProductName"
+                                  type="text"
+                                  placeholder=""
+                                  autoFocus
+                                  value={item.productName}
+                                />
                               </Form.Group>
                               <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
                                 <Form.Label>Miêu tả</Form.Label>
-                                <Form.Control as="textarea" rows={1} />
+                                <Form.Control
+                                  id="Text_
+description"
+                                  as="textarea"
+                                  rows={1}
+                                  value={item.description}
+                                />
                               </Form.Group>
-                              <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-                                <Form.Label>Nhãn hiệu</Form.Label>
-                                <Form.Control as="textarea" rows={1} />
-                              </Form.Group>
-                              <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                              {/* <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
                                 <Form.Label>Loại sản phẩm</Form.Label>
-                                <Form.Control as="textarea" rows={1} />
+                                <Form.Control
+                                  value={item.categoryName}
+                                  id="Text_Brand"
+                                  as="select"
+                                  rows={1}
+                                />
+                              </Form.Group> */}
+                              <Form.Group className="mb-3" controlId="exampleForm.ControlSelect1">
+                                <Form.Label>Loại sản phẩm</Form.Label>
+                                <Form.Control
+                                  as="select"
+                                  value={selectedProduct ? selectedProduct.categoryName : ''}
+                                  onChange={(e) =>
+                                    setSelectedProduct({
+                                      ...selectedProduct,
+                                      categoryName: e.target.value,
+                                    })
+                                  }
+                                >
+                                  <option value="">Chọn loại sản phẩm</option>
+                                  {category.map((category) => (
+                                    <option key={category.categoryID} value={category.categoryName}>
+                                      {category.categoryName}
+                                    </option>
+                                  ))}
+                                </Form.Control>
                               </Form.Group>
+
+                              {/* <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                                <Form.Label>Nhãn hiệu</Form.Label>
+                                <Form.Control  id="Text_Category" as="textarea" rows={1} />
+                              </Form.Group> */}
                               <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
                                 <Form.Label>Hình ảnh</Form.Label>
-                                <Form.Control type="file" />
+                                <Form.Control
+                                  onChange={handleImageChange}
+                                  id="File_image"
+                                  type="file"
+                                />
                               </Form.Group>
+                              {imageSrc && (
+                                <img
+                                  src={imageSrc}
+                                  style={{ width: '100px', height: '70px' }}
+                                  alt="product"
+                                />
+                              )}
                             </Form>
                           </Modal.Body>
                           <Modal.Footer>
