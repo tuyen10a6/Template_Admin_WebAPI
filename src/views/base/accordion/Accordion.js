@@ -32,16 +32,52 @@ const Accordion = () => {
 
   //
   const [show, setShow] = useState(false)
-
   const handleClose = () => setShow(false)
+
+  // const handleClose = () => setShow(false)
+  const handleSave = () => {
+    fetch(`https://localhost:7014/api/SanPham/EditSanPham`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        productID: selectedProduct.productID,
+        productName: selectedProduct.productName,
+        description: selectedProduct.description,
+        imageURL: selectedProduct.imageURL,
+        categoryID: selectedProduct.categoryID,
+        brandID: 1,
+        categoryName: 'string',
+        price: 0,
+      }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          console.log('Product updated successfully')
+          handleClose()
+        } else {
+          console.log('Error updating product')
+        }
+      })
+      .catch((error) => console.error(error))
+  }
+
   // Tạo state lưu trữ toàn bộ loại sản phẩm
 
-  const [category, setcategory] = useState([])
+  const [category, setCategory] = useState([])
+  const [categoryIdMap, setCategoryIdMap] = useState({})
+
   useEffect(() => {
     fetch('https://localhost:7014/apiUser/Categories/GetAllCategories')
       .then((res) => res.json())
       .then((data) => {
-        setcategory(data)
+        setCategory(data)
+        const idMap = {}
+        data.forEach((category) => {
+          idMap[category.categoryName] = category.categoryID
+        })
+        setCategoryIdMap(idMap)
         console.log('Call Api GetAllCategory Successfully')
       })
   }, [])
@@ -65,15 +101,15 @@ const Accordion = () => {
   }, [pageNumber, pageSize])
 
   /// Image Product Change
-  const [imageSrc, setImageSrc] = useState(null)
-  const handleImageChange = (e) => {
-    const file = e.target.files[0]
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      setImageSrc(event.target.result)
-    }
-    reader.readAsDataURL(file)
-  }
+  // const [imageSrc, setImageSrc] = useState(null)
+  // const handleImageChange = (e) => {
+  //   const file = e.target.files[0]
+  //   const reader = new FileReader()
+  //   reader.onload = (event) => {
+  //     setImageSrc(event.target.result)
+  //   }
+  //   reader.readAsDataURL(file)
+  // }
 
   function handlePageChange(page) {
     if (page !== totalPages) {
@@ -142,11 +178,26 @@ const Accordion = () => {
                           onClick={() => handleShow(item)}
                           className="Icon-update"
                         />
-                        <Modal style={{ background: 'none' }} show={show} onHide={handleClose}>
-                          <Modal.Header closeButton>
+                        <Modal style={{ background: 'none' }} show={show}>
+                          <Modal.Header onClick={handleClose} closeButton>
                             <Modal.Title>Sửa sản phẩm</Modal.Title>
                           </Modal.Header>
                           <Modal.Body>
+                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                              <Form.Control
+                                id="Text_ProductId"
+                                type="hidden"
+                                placeholder=""
+                                autoFocus
+                                value={selectedProduct ? selectedProduct.productID : ''}
+                                onChange={(e) =>
+                                  setSelectedProduct({
+                                    ...selectedProduct,
+                                    productID: e.target.value,
+                                  })
+                                }
+                              />
+                            </Form.Group>
                             <Form>
                               <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                 <Form.Label>Tên sản phẩm</Form.Label>
@@ -155,28 +206,40 @@ const Accordion = () => {
                                   type="text"
                                   placeholder=""
                                   autoFocus
-                                  value={item.productName}
+                                  value={selectedProduct ? selectedProduct.productName : ''}
+                                  onChange={(e) =>
+                                    setSelectedProduct({
+                                      ...selectedProduct,
+                                      productName: e.target.value,
+                                    })
+                                  }
                                 />
                               </Form.Group>
                               <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
                                 <Form.Label>Miêu tả</Form.Label>
                                 <Form.Control
                                   id="Text_
-description"
+  description"
                                   as="textarea"
                                   rows={1}
-                                  value={item.description}
+                                  value={selectedProduct ? selectedProduct.description : ''}
+                                  onChange={(e) =>
+                                    setSelectedProduct({
+                                      ...selectedProduct,
+                                      description: e.target.value,
+                                    })
+                                  }
                                 />
                               </Form.Group>
                               {/* <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-                                <Form.Label>Loại sản phẩm</Form.Label>
-                                <Form.Control
-                                  value={item.categoryName}
-                                  id="Text_Brand"
-                                  as="select"
-                                  rows={1}
-                                />
-                              </Form.Group> */}
+                                  <Form.Label>Loại sản phẩm</Form.Label>
+                                  <Form.Control
+                                    value={item.categoryName}
+                                    id="Text_Brand"
+                                    as="select"
+                                    rows={1}
+                                  />
+                                </Form.Group> */}
                               <Form.Group className="mb-3" controlId="exampleForm.ControlSelect1">
                                 <Form.Label>Loại sản phẩm</Form.Label>
                                 <Form.Control
@@ -185,6 +248,7 @@ description"
                                   onChange={(e) =>
                                     setSelectedProduct({
                                       ...selectedProduct,
+                                      categoryID: categoryIdMap[e.target.value],
                                       categoryName: e.target.value,
                                     })
                                   }
@@ -198,32 +262,21 @@ description"
                                 </Form.Control>
                               </Form.Group>
 
-                              {/* <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-                                <Form.Label>Nhãn hiệu</Form.Label>
-                                <Form.Control  id="Text_Category" as="textarea" rows={1} />
-                              </Form.Group> */}
                               <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
                                 <Form.Label>Hình ảnh</Form.Label>
                                 <Form.Control
-                                  onChange={handleImageChange}
+                                  // onChange={handleImageChange}
                                   id="File_image"
                                   type="file"
                                 />
                               </Form.Group>
-                              {imageSrc && (
-                                <img
-                                  src={imageSrc}
-                                  style={{ width: '100px', height: '70px' }}
-                                  alt="product"
-                                />
-                              )}
                             </Form>
                           </Modal.Body>
                           <Modal.Footer>
-                            <Button variant="secondary" onClick={handleClose}>
+                            <Button onClick={handleClose} variant="secondary">
                               Đóng
                             </Button>
-                            <Button variant="primary" onClick={handleClose}>
+                            <Button variant="primary" onClick={handleSave}>
                               Lưu
                             </Button>
                           </Modal.Footer>
