@@ -185,9 +185,9 @@ const Accordion = () => {
           imageURL: imageURLs,
           categoryID: selectedProduct.categoryID,
           brandID: selectedProduct.brandID,
-          categoryName: 'string',
+          categoryName: selectedProduct.categoryName,
           price: 0,
-          brandName: 'string',
+          brandName: selectedProduct.brandName,
         }),
       })
         .then((response) => {
@@ -205,9 +205,9 @@ const Accordion = () => {
               imageURL: imageURLs,
               categoryID: selectedProduct.categoryID,
               brandID: selectedProduct.brandID,
-              categoryName: 'string',
+              categoryName: selectedProduct.categoryName,
               price: 0,
-              brandName: 'string',
+              brandName: selectedProduct.brandName,
             }
             setDataProduct(newDataProduct)
             alert('Update sản phẩm thành công !')
@@ -273,9 +273,9 @@ const Accordion = () => {
   }
   // Api Search Product
   const [productName, setProductName] = useState('')
-  const handleInputChange = (event) => {
-    setProductName(event.target.value)
-  }
+  // const handleInputChange = (event) => {
+  //   setProductName(event.target.value)
+  // }
   const handleSearch = async (event) => {
     const value = event.target.value
     setProductName(value)
@@ -309,7 +309,7 @@ const Accordion = () => {
             <div style={{ display: 'flex' }}>
               <p style={{ marginBottom: '0px', marginRight: '10px' }}> Tìm kiếm</p>
               <Form.Control
-                style={{ width: '200px' }}
+                style={{ width: '200px', height: '37px' }}
                 id="Text_search"
                 type="text"
                 placeholder=""
@@ -317,9 +317,57 @@ const Accordion = () => {
                 onChange={handleSearch}
                 value={productName}
               />
-              {/* <button onClick={handleSearch}>Search</button> */}
             </div>
-
+            <div>
+              <Form.Group
+                className="mb-3s"
+                style={{ height: '50px', marginBottom: '0px !important' }}
+                controlId="exampleForm.ControlSelect1"
+              >
+                <Form.Control
+                  as="select"
+                  value={selectedProduct ? selectedProduct.categoryName : ''}
+                  onChange={(e) =>
+                    setSelectedProduct({
+                      ...selectedProduct,
+                      categoryID: categoryIdMap[e.target.value],
+                      categoryName: e.target.value,
+                    })
+                  }
+                >
+                  <option style={{ height: '35px' }} value="">
+                    Chọn loại sản phẩm
+                  </option>
+                  {category.map((category) => (
+                    <option
+                      style={{ height: '35px' }}
+                      key={category.categoryID}
+                      value={category.categoryName}
+                    >
+                      {category.categoryName}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+            </div>
+            <div>
+              <Form.Control
+                as="select"
+                value={selectedProduct ? selectedProduct.brandName : ''}
+                onChange={(e) =>
+                  setSelectedProduct({
+                    ...selectedProduct,
+                    brandID: brandIdMap[e.target.value],
+                    brandName: e.target.value,
+                  })
+                }
+              >
+                <option value="">Khác</option>
+                <option value="Ngày tạo mới nhất">Ngày tạo mới nhất</option>
+                <option value="Sản phẩm tồn kho nhiều nhất">Sản phẩm tồn kho nhiều nhất</option>
+                <option value="Sản phẩm nhiều người đặt nhất">Sản phẩm nhiều người đặt nhất</option>
+              </Form.Control>
+            </div>
             <Modal show={showSecond} onHide={handleCloseSecond} backdrop="static" keyboard={false}>
               <Modal.Header closeButton>
                 <Modal.Title>Thêm sản phẩm</Modal.Title>
