@@ -107,10 +107,12 @@ const Accordion = () => {
     }
 
     const fileInput = document.querySelector('#File_image')
+
     const file = fileInput.files[0]
 
     if (!file) {
       alert('Vui lòng chọn hình ảnh sản phẩm.')
+      console.log(file)
       return
     }
 
@@ -156,41 +158,80 @@ const Accordion = () => {
       .catch((error) => console.error(error))
   }
 
-  // Hàm sửa
-  const handleSave = () => {
-    fetch(`https://localhost:7014/api/SanPham/EditSanPham`, {
+  const handeUpdate = () => {
+    const ProductName = document.getElementById('Text_ProductName_edit').value.length
+    const Description = document.getElementById('Text_description_edit').value.length
+
+    if (ProductName === 0 || Description === 0) {
+      alert('Vui lòng nhập đầy đủ thông tin sản phẩm')
+      console.log('ProductName Null')
+      return
+    }
+
+    const fileInput = document.getElementById('File_edit')
+    const file = fileInput.files[0]
+
+    if (!file) {
+      alert('Vui lòng chọn hình ảnh sản phẩm.')
+      console.log(file)
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    fetch('https://localhost:7014/api/TestUpLoadFile/upload/product', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        productID: selectedProduct.productID,
-        productName: selectedProduct.productName,
-        description: selectedProduct.description,
-        imageURL: selectedProduct.imageURL,
-        categoryID: selectedProduct.categoryID,
-        brandID: selectedProduct.brandID,
-        categoryName: 'string',
-        price: 0,
-        brandName: 'string',
-      }),
+      body: formData,
     })
-      .then((response) => {
-        if (response.ok) {
-          console.log('Product updated successfully')
-          handleClose()
-          notify()
-          setDataProduct(
-            DataProduct.map((product) => {
-              if (product.productID === selectedProduct.productID) {
-                return selectedProduct
+      .then((response) => response.json())
+      .then((data) => {
+        const imageURLs = `https://localhost:7014${data.filePath}`
+
+        fetch(`https://localhost:7014/api/SanPham/EditSanPham`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            productID: selectedProduct.productID,
+            productName: selectedProduct.productName,
+            description: selectedProduct.description,
+            imageURL: imageURLs,
+            categoryID: selectedProduct.categoryID,
+            brandID: selectedProduct.brandID,
+            categoryName: 'string',
+            price: 0,
+            brandName: 'string',
+          }),
+        })
+          .then((response) => {
+            if (response.ok) {
+              console.log('Product Update successfully')
+              const newDataProduct = [...DataProduct]
+              const index = newDataProduct.findIndex(
+                (item) => item.productID === selectedProduct.productID,
+              )
+              newDataProduct[index] = {
+                ...newDataProduct[index],
+                productID: selectedProduct.productID,
+                productName: selectedProduct.productName,
+                description: selectedProduct.description,
+                imageURL: imageURLs,
+                categoryID: selectedProduct.categoryID,
+                brandID: selectedProduct.brandID,
+                categoryName: 'string',
+                price: 0,
+                brandName: 'string',
               }
-              return product
-            }),
-          )
-        } else {
-          console.log('Error updating product')
-        }
+              setDataProduct(newDataProduct)
+              alert('Update sản phẩm thành công !')
+              handleClose()
+            } else {
+              console.log('Error Add product')
+            }
+          })
+          .catch((error) => console.error(error))
       })
       .catch((error) => console.error(error))
   }
@@ -220,10 +261,7 @@ const Accordion = () => {
         })
     }
   }
-  function SaveUpdateProduct() {
-    handleSave()
-    notify()
-  }
+
   // Notify
   const notify = () => {
     toast.success('Sửa thành công !', {
@@ -409,7 +447,7 @@ const Accordion = () => {
                               <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                 <Form.Label>Tên sản phẩm</Form.Label>
                                 <Form.Control
-                                  id="Text_ProductName"
+                                  id="Text_ProductName_edit"
                                   type="text"
                                   placeholder=""
                                   autoFocus
@@ -425,8 +463,7 @@ const Accordion = () => {
                               <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
                                 <Form.Label>Miêu tả</Form.Label>
                                 <Form.Control
-                                  id="Text_
-  description"
+                                  id="Text_description_edit"
                                   as="textarea"
                                   rows={1}
                                   value={selectedProduct ? selectedProduct.description : ''}
@@ -485,10 +522,13 @@ const Accordion = () => {
                               <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
                                 <Form.Label>Hình ảnh</Form.Label>
                                 <Form.Control
-                                  // onChange={handleImageChange}
-                                  id="File_image"
+                                  id="File_edit"
                                   required="required"
                                   type="file"
+                                  onClick={() => {
+                                    const fileInput = document.getElementById('File_edit')
+                                    fileInput.click()
+                                  }}
                                 />
                               </Form.Group>
                             </Form>
@@ -497,7 +537,7 @@ const Accordion = () => {
                             <Button onClick={handleClose} variant="secondary">
                               Đóng
                             </Button>
-                            <Button variant="primary" onClick={SaveUpdateProduct}>
+                            <Button variant="primary" onClick={handeUpdate}>
                               Lưu
                             </Button>
                             <ToastContainer />
