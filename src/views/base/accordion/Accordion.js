@@ -1,5 +1,6 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
+import axios from 'axios'
 import './../../../scss/_Product.scss'
 // Import React Icon
 import { GrUpdate } from 'react-icons/gr'
@@ -270,27 +271,55 @@ const Accordion = () => {
       position: toast.POSITION.TOP_RIGHT,
     })
   }
+  // Api Search Product
+  const [productName, setProductName] = useState('')
+  const handleInputChange = (event) => {
+    setProductName(event.target.value)
+  }
+  const handleSearch = async (event) => {
+    const value = event.target.value
+    setProductName(value)
+
+    const response = await axios.get(`https://localhost:7014/api/SanPham/SearchProduct/${value}`)
+    setDataProduct(response.data)
+  }
 
   return (
     <CRow>
       <CCol xs={12}>
         <CCard className="mb-4">
-          <CCardHeader>
-            <strong>Sản phẩm</strong>
+          <CCardHeader style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div className="Create_Product">
+              <strong>Sản phẩm</strong>
 
-            <button
-              onClick={handleShowSecond}
-              style={{
-                background: '#ccc',
-                border: 'none',
-                padding: '5px 10px',
-                borderRadius: '6px',
-                marginLeft: '20px',
-              }}
-            >
-              {' '}
-              Thêm mới
-            </button>
+              <button
+                onClick={handleShowSecond}
+                style={{
+                  background: '#ccc',
+                  border: 'none',
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  marginLeft: '20px',
+                }}
+              >
+                {' '}
+                Thêm mới
+              </button>
+            </div>
+            <div style={{ display: 'flex' }}>
+              <p style={{ marginBottom: '0px', marginRight: '10px' }}> Tìm kiếm</p>
+              <Form.Control
+                style={{ width: '200px' }}
+                id="Text_search"
+                type="text"
+                placeholder=""
+                autoFocus
+                onChange={handleSearch}
+                value={productName}
+              />
+              {/* <button onClick={handleSearch}>Search</button> */}
+            </div>
+
             <Modal show={showSecond} onHide={handleCloseSecond} backdrop="static" keyboard={false}>
               <Modal.Header closeButton>
                 <Modal.Title>Thêm sản phẩm</Modal.Title>
