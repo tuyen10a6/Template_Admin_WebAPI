@@ -94,7 +94,7 @@ const Accordion = () => {
     fetchDataProduct()
   }, [pageNumber, pageSize])
 
-  // Hàm thêm
+  // Function Update
 
   const handleAdd = () => {
     const ProductName = document.getElementById('Text_ProductName').value.length
@@ -158,83 +158,85 @@ const Accordion = () => {
       .catch((error) => console.error(error))
   }
 
+  // Function Update
   const handeUpdate = () => {
     const ProductName = document.getElementById('Text_ProductName_edit').value.length
     const Description = document.getElementById('Text_description_edit').value.length
+    const fileInput = document.getElementById('File_edit')
+    const file = fileInput.files[0]
+    let imageURLs = selectedProduct.imageURL // sử dụng ảnh cũ nếu không có ảnh mới
 
     if (ProductName === 0 || Description === 0) {
       alert('Vui lòng nhập đầy đủ thông tin sản phẩm')
       console.log('ProductName Null')
       return
     }
-
-    const fileInput = document.getElementById('File_edit')
-    const file = fileInput.files[0]
-
-    if (!file) {
-      alert('Vui lòng chọn hình ảnh sản phẩm.')
-      console.log(file)
-      return
-    }
-
-    const formData = new FormData()
-    formData.append('file', file)
-
-    fetch('https://localhost:7014/api/TestUpLoadFile/upload/product', {
-      method: 'POST',
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        const imageURLs = `https://localhost:7014${data.filePath}`
-
-        fetch(`https://localhost:7014/api/SanPham/EditSanPham`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            productID: selectedProduct.productID,
-            productName: selectedProduct.productName,
-            description: selectedProduct.description,
-            imageURL: imageURLs,
-            categoryID: selectedProduct.categoryID,
-            brandID: selectedProduct.brandID,
-            categoryName: 'string',
-            price: 0,
-            brandName: 'string',
-          }),
-        })
-          .then((response) => {
-            if (response.ok) {
-              console.log('Product Update successfully')
-              const newDataProduct = [...DataProduct]
-              const index = newDataProduct.findIndex(
-                (item) => item.productID === selectedProduct.productID,
-              )
-              newDataProduct[index] = {
-                ...newDataProduct[index],
-                productID: selectedProduct.productID,
-                productName: selectedProduct.productName,
-                description: selectedProduct.description,
-                imageURL: imageURLs,
-                categoryID: selectedProduct.categoryID,
-                brandID: selectedProduct.brandID,
-                categoryName: 'string',
-                price: 0,
-                brandName: 'string',
-              }
-              setDataProduct(newDataProduct)
-              alert('Update sản phẩm thành công !')
-              handleClose()
-            } else {
-              console.log('Error Add product')
-            }
-          })
-          .catch((error) => console.error(error))
+    const updateProduct = (imageURLs) => {
+      fetch(`https://localhost:7014/api/SanPham/EditSanPham`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productID: selectedProduct.productID,
+          productName: selectedProduct.productName,
+          description: selectedProduct.description,
+          imageURL: imageURLs,
+          categoryID: selectedProduct.categoryID,
+          brandID: selectedProduct.brandID,
+          categoryName: 'string',
+          price: 0,
+          brandName: 'string',
+        }),
       })
-      .catch((error) => console.error(error))
+        .then((response) => {
+          if (response.ok) {
+            console.log('Product Update successfully')
+            const newDataProduct = [...DataProduct]
+            const index = newDataProduct.findIndex(
+              (item) => item.productID === selectedProduct.productID,
+            )
+            newDataProduct[index] = {
+              ...newDataProduct[index],
+              productID: selectedProduct.productID,
+              productName: selectedProduct.productName,
+              description: selectedProduct.description,
+              imageURL: imageURLs,
+              categoryID: selectedProduct.categoryID,
+              brandID: selectedProduct.brandID,
+              categoryName: 'string',
+              price: 0,
+              brandName: 'string',
+            }
+            setDataProduct(newDataProduct)
+            alert('Update sản phẩm thành công !')
+            handleClose()
+          } else {
+            console.log('Error Add product')
+          }
+        })
+        .catch((error) => console.error(error))
+    }
+    if (file) {
+      // nếu có ảnh mới được chọn
+      const formData = new FormData()
+      formData.append('file', file)
+
+      fetch('https://localhost:7014/api/TestUpLoadFile/upload/product', {
+        method: 'POST',
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          imageURLs = `https://localhost:7014${data.filePath}`
+          updateProduct(imageURLs) // gọi hàm cập nhật sản phẩm
+        })
+        .catch((error) => console.error(error))
+    } else {
+      updateProduct(imageURLs) // gọi hàm cập nhật sản phẩm
+    }
   }
+
   function handlePageChange(page) {
     if (page !== totalPages) {
       setPageNumber(page)
@@ -526,8 +528,9 @@ const Accordion = () => {
                                   required="required"
                                   type="file"
                                   onClick={() => {
-                                    const fileInput = document.getElementById('File_edit')
-                                    fileInput.click()
+                                    const fileInput = document.getElementById('File_edit').click()
+
+                                    console.log('ok')
                                   }}
                                 />
                               </Form.Group>
