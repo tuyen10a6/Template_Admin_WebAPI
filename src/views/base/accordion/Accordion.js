@@ -283,6 +283,40 @@ const Accordion = () => {
     const response = await axios.get(`https://localhost:7014/api/SanPham/SearchProduct/${value}`)
     setDataProduct(response.data)
   }
+  // Api Filter Products By Category
+  const handleCategoryChange = async (categoryId) => {
+    try {
+      const response = await fetch(
+        `https://localhost:7014/api/SanPham/GetProductsByCategory/${categoryId}`,
+      )
+      const data = await response.json()
+      setDataProduct(data)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  const handleSelectChange = async (event) => {
+    const selectedValue = event.target.value
+    if (selectedValue === 'Ngày tạo mới nhất') {
+      const response = await fetch(
+        'https://localhost:7014/api/SanPham/GetProductByCreateDateDesc',
+        {
+          method: 'GET',
+        },
+      )
+      const data = await response.json()
+      setDataProduct(data)
+    } else if (selectedValue === 'Sản phẩm tồn kho nhiều nhất') {
+      const response = await fetch(
+        'https://localhost:7014/api/SanPham/GetTopProductsByStockLevel',
+        {
+          method: 'GET',
+        },
+      )
+      const data = await response.json()
+      setDataProduct(data)
+    }
+  }
 
   return (
     <CRow>
@@ -327,13 +361,15 @@ const Accordion = () => {
                 <Form.Control
                   as="select"
                   value={selectedProduct ? selectedProduct.categoryName : ''}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const categoryId = categoryIdMap[e.target.value]
                     setSelectedProduct({
                       ...selectedProduct,
-                      categoryID: categoryIdMap[e.target.value],
+                      categoryID: categoryId,
                       categoryName: e.target.value,
                     })
-                  }
+                    handleCategoryChange(categoryId)
+                  }}
                 >
                   <option style={{ height: '35px' }} value="">
                     Chọn loại sản phẩm
@@ -351,22 +387,22 @@ const Accordion = () => {
               </Form.Group>
             </div>
             <div>
-              <Form.Control
-                as="select"
-                value={selectedProduct ? selectedProduct.brandName : ''}
-                onChange={(e) =>
-                  setSelectedProduct({
-                    ...selectedProduct,
-                    brandID: brandIdMap[e.target.value],
-                    brandName: e.target.value,
-                  })
-                }
-              >
+              <Form.Control as="select" onChange={handleSelectChange}>
                 <option value="">Khác</option>
                 <option value="Ngày tạo mới nhất">Ngày tạo mới nhất</option>
                 <option value="Sản phẩm tồn kho nhiều nhất">Sản phẩm tồn kho nhiều nhất</option>
                 <option value="Sản phẩm nhiều người đặt nhất">Sản phẩm nhiều người đặt nhất</option>
               </Form.Control>
+
+              {/* <Form.Control
+                as="select"
+              
+              >
+                <option value="">Khác</option>
+                <option value="Ngày tạo mới nhất">Ngày tạo mới nhất</option>
+                <option value="Sản phẩm tồn kho nhiều nhất">Sản phẩm tồn kho nhiều nhất</option>
+                <option value="Sản phẩm nhiều người đặt nhất">Sản phẩm nhiều người đặt nhất</option>
+              </Form.Control> */}
             </div>
             <Modal show={showSecond} onHide={handleCloseSecond} backdrop="static" keyboard={false}>
               <Modal.Header closeButton>
