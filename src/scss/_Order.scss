@@ -40,3 +40,8 @@
 .modal-content {
   width: 750px;
 }
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

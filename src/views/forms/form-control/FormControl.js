@@ -6,6 +6,9 @@ import ReactPaginate from 'react-paginate'
 import './../../../scss/_Order.scss'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
+import Form from 'react-bootstrap/Form'
+// Import Icon
+import { GrUpdate } from 'react-icons/gr'
 import {
   CButton,
   CCard,
@@ -58,25 +61,55 @@ const FormControl = () => {
   const handleCloseSecond = () => setShowSecond(false)
   const handleShowSecond = () => setShowSecond(true)
 
+  // Hook quản lý trạng thái của Modal Update
+  const [showUpdate, setShowUpdate] = useState(false)
+  const handleCloseUpdate = () => setShowUpdate(false)
+  const handleOpenUpdate = () => setShowUpdate(true)
   useEffect(() => {
     fetchOrders()
   }, [])
   // state mới để lưu trữ đơn hàng đang được chọn
   const [selectedOrder, setSelectedOrder] = useState(null)
-
+  //  Khởi tạo Hook state lưu trữ các trạng thái đơn hàng
+  const [dataorderstatus, setdataorderstatus] = useState([])
+  const fetchDataOrderStatus = async () => {
+    try {
+      const reponse = await axios('https://localhost:7014/api/Order/GetAllOrderStatus')
+      setdataorderstatus(reponse.data)
+      console.log(reponse.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  // Useffect tải dữ liệu và cập nhật state
+  useEffect(() => {
+    fetchDataOrderStatus()
+  }, [])
   return (
     <CRow>
       <CCol xs={12}>
         <CCard className="mb-4">
           <CCardHeader>
-            <strong>Đơn hàng</strong>
+            <div className="Title_Order">
+              <strong>Đơn hàng</strong>
+            </div>
+            <div className="Select_OrderStatus">
+              <Form.Control style={{ width: '300px' }} as="select">
+                {dataorderstatus.map((item) => (
+                  <option key={item.orderStatusId} value={item.orderStatusId}>
+                    {' '}
+                    {item.orderStatusName}
+                  </option>
+                ))}
+              </Form.Control>
+            </div>
           </CCardHeader>
           <CCardBody>
             <Table striped bordered hover>
               <thead>
                 <tr style={{ fontSize: '14px' }}>
                   <th>Số thứ tự</th>
-                  <th>Khách hàng</th>
+                  <th> Tên khách hàng</th>
                   <th>Số điện thoại</th>
                   <th>Địa chỉ</th>
                   <th>Email</th>
@@ -132,10 +165,17 @@ const FormControl = () => {
                                 selectedOrder.orderDetails &&
                                 selectedOrder.orderDetails.map((detail) => (
                                   <tr key={detail.orderID}>
-                                    <td>{detail.productName}</td>
-                                    <td>{detail.varrianname}</td>
+                                    <td style={{ fontSize: '13.5px' }}>{detail.productName}</td>
+                                    <td style={{ fontSize: '13.5px' }}>{detail.varrianname}</td>
                                     <td>{detail.quantity}</td>
-                                    <td>{detail.price}</td>
+                                    <td>
+                                      <td>
+                                        {detail.price.toLocaleString('vi-VN', {
+                                          style: 'currency',
+                                          currency: 'VND',
+                                        })}
+                                      </td>
+                                    </td>
                                   </tr>
                                 ))}
                             </tbody>
@@ -148,54 +188,93 @@ const FormControl = () => {
                         </Modal.Footer>
                       </Modal>
 
-                      {/* <Modal
+                      <td
+                        onClick={() => {
+                          setSelectedOrder(order)
+                          handleOpenUpdate()
+                        }}
+                        style={{ textAlign: 'center' }}
+                      >
+                        <GrUpdate />
+                      </td>
+
+                      <Modal
                         style={{ background: 'none' }}
-                        show={showSecond}
-                        onHide={handleCloseSecond}
+                        show={showUpdate}
+                        onHide={handleCloseUpdate}
                         backdrop="static"
                         keyboard={false}
                       >
                         <Modal.Header closeButton>
-                          <Modal.Title>Chi tiết đơn hàng</Modal.Title>
+                          <Modal.Title> Sửa thông tin đơn hàng</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
-                          <Table striped bordered hover>
-                            <thead>
-                              <tr>
-                                <th>Tên sản phẩm</th>
-                                <th>Phiên bản</th>
-                                <th>Số lượng</th>
-                                <th>Giá</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {order &&
-                                order.orderDetails &&
-                                order.orderDetails.map((detail) => (
-                                  <tr key={detail.orderID}>
-                                    <td>{detail.productName}</td>
-                                    <td>{detail.varrianname}</td>
-                                    <td>{detail.quantity}</td>
-                                    <td>{detail.price}</td>
-                                  </tr>
-                                ))}
-                            </tbody>
-                          </Table>
+                          <Form.Label> Tên khách hàng</Form.Label>
+                          <Form.Control
+                            id="Text_ProductName_edit"
+                            type="text"
+                            placeholder=""
+                            defaultValue={selectedOrder?.customerName}
+                            autoFocus
+                          />
+
+                          <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Số điện thoại</Form.Label>
+                            <Form.Control
+                              id="Text_Phone_edit"
+                              type="text"
+                              placeholder=""
+                              defaultValue={selectedOrder?.customerPhone}
+                              autoFocus
+                            />
+                          </Form.Group>
+                          <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Địa chỉ</Form.Label>
+                            <Form.Control
+                              id="Text_Email_edit"
+                              type="text"
+                              placeholder=""
+                              defaultValue={selectedOrder?.customerAddress}
+                              autoFocus
+                            />
+                          </Form.Group>
+                          <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Email</Form.Label>
+                            <Form.Control
+                              id="Text_Email_edit"
+                              type="text"
+                              placeholder=""
+                              defaultValue={selectedOrder?.customerEmail}
+                              autoFocus
+                            />
+                          </Form.Group>
+                          <Form.Control
+                            style={{ width: '300px', textAlign: 'center', margin: '0px auto' }}
+                            as="select"
+                            value={selectedOrder?.orderStatusName}
+                          >
+                            {dataorderstatus.map((item) => (
+                              <option key={item.orderStatusId} value={item.orderStatusId}>
+                                {' '}
+                                {item.orderStatusName}
+                              </option>
+                            ))}
+                          </Form.Control>
                         </Modal.Body>
                         <Modal.Footer>
-                          <Button variant="secondary" onClick={handleCloseSecond}>
+                          <Button variant="secondary" onClick={handleCloseUpdate}>
                             Đóng
                           </Button>
+                          <Button variant="primary">Thêm</Button>
                         </Modal.Footer>
-                      </Modal> */}
-
-                      <td></td>
+                      </Modal>
                     </tr>
                   ))}
               </tbody>
             </Table>
 
             <div className="d-flex justify-content-center my-3">
+              {/* Phân trang */}
               <ReactPaginate
                 //...
                 pageCount={totalPages}
