@@ -273,9 +273,7 @@ const Accordion = () => {
   }
   // Api Search Product
   const [productName, setProductName] = useState('')
-  // const handleInputChange = (event) => {
-  //   setProductName(event.target.value)
-  // }
+
   const handleSearch = async (event) => {
     const value = event.target.value
     setProductName(value)
@@ -371,7 +369,7 @@ const Accordion = () => {
                     handleCategoryChange(categoryId)
                   }}
                 >
-                  <option style={{ height: '35px' }} value="">
+                  <option disabled style={{ height: '35px' }} value="">
                     Chọn loại sản phẩm
                   </option>
                   {category.map((category) => (

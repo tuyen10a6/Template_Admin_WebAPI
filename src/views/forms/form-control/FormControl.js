@@ -76,7 +76,13 @@ const FormControl = () => {
     try {
       const reponse = await axios('https://localhost:7014/api/Order/GetAllOrderStatus')
       setdataorderstatus(reponse.data)
-      console.log(reponse.data)
+
+      const idMap = {}
+      reponse.data.forEach((order) => {
+        idMap[order.orderStatusName] = order.orderStatusID
+      })
+      setOrderStatusIdMap(idMap)
+      console.log('Call Api All OrderStatus')
     } catch (error) {
       console.log(error)
     }
@@ -88,19 +94,31 @@ const FormControl = () => {
 
   // Api Update Product
   const updateOrder = () => {
+    const orderID = document.getElementById('Text_OrderID_edit').value
     const customerID = document.getElementById('Text_CustomerID_edit').value
     const customerName = document.getElementById('Text_CustomerName_edit').value
     const customerPhone = document.getElementById('Text_CustomerPhone_edit').value
     const customerAddress = document.getElementById('Text_CustomerAdrress_edit').value
     const customerEmail = document.getElementById('Text_CustomerEmail_edit').value
-    const orderStatusID = selectedOrder.orderStatusName
+    const orderStatusID = document.getElementById('Text_OrderStatusID').value
+    console.log(orderID)
+    console.log(customerID)
+    console.log(customerName)
+    console.log(customerPhone)
+    console.log(customerAddress)
+    console.log(customerEmail)
+    console.log(orderStatusID)
 
     const data = {
+      orderID,
+      customerID,
       customerName,
       customerPhone,
       customerAddress,
       customerEmail,
-      orderStatusName,
+      orderStatusID,
+      orderStatusName: 'string',
+      orderDetails: [],
     }
 
     fetch('https://localhost:7014/api/Order/UpdateOrder', {
@@ -111,11 +129,28 @@ const FormControl = () => {
       body: JSON.stringify(data),
     })
       .then((response) => {
-        // Xử lý kết quả trả về từ server
+        handleCloseUpdate()
+        alert('Sửa thành công')
+        fetchOrders()
       })
       .catch((error) => {
         // Xử lý lỗi khi gửi yêu cầu lên server
       })
+  }
+  //Api Fillter Orders By OrderStatus
+
+  const [OrderStatusIdMap, setOrderStatusIdMap] = useState({})
+
+  const handleOrderChange = async (OrderId) => {
+    try {
+      const response = await fetch(
+        `https://localhost:7014/api/Order/GetOrdersByOrderStatus/${OrderId}`,
+      )
+      const data = await response.json()
+      setOrders(data)
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   return (
@@ -127,10 +162,25 @@ const FormControl = () => {
               <strong>Đơn hàng</strong>
             </div>
             <div className="Select_OrderStatus">
-              <Form.Control style={{ width: '300px' }} as="select">
+              <Form.Control
+                value={selectedOrder ? selectedOrder.orderStatusName : ''}
+                onChange={(e) => {
+                  const orderstatusId = OrderStatusIdMap[e.target.value]
+                  setSelectedOrder({
+                    ...selectedOrder,
+                    orderStatusID: orderstatusId,
+                    orderStatusName: e.target.value,
+                  })
+                  handleOrderChange(orderstatusId)
+                }}
+                style={{ width: '300px' }}
+                as="select"
+              >
+                <option value="" disabled>
+                  Select an order status
+                </option>
                 {dataorderstatus.map((item) => (
-                  <option key={item.orderStatusId} value={item.orderStatusId}>
-                    {' '}
+                  <option key={item.orderStatusID} value={item.orderStatusName}>
                     {item.orderStatusName}
                   </option>
                 ))}
@@ -243,6 +293,13 @@ const FormControl = () => {
                         </Modal.Header>
                         <Modal.Body>
                           <Form.Control
+                            id="Text_OrderID_edit"
+                            type="hidden"
+                            placeholder=""
+                            defaultValue={selectedOrder?.orderID}
+                            autoFocus
+                          />
+                          <Form.Control
                             id="Text_CustomerID_edit"
                             type="hidden"
                             placeholder=""
@@ -254,7 +311,13 @@ const FormControl = () => {
                             id="Text_CustomerName_edit"
                             type="text"
                             placeholder=""
-                            defaultValue={selectedOrder?.customerName}
+                            value={selectedOrder?.customerName}
+                            onChange={(event) =>
+                              setSelectedOrder({
+                                ...selectedOrder,
+                                customerName: event.target.value,
+                              })
+                            }
                             autoFocus
                           />
 
@@ -264,7 +327,13 @@ const FormControl = () => {
                               id="Text_CustomerPhone_edit"
                               type="text"
                               placeholder=""
-                              defaultValue={selectedOrder?.customerPhone}
+                              value={selectedOrder?.customerPhone}
+                              onChange={(event) =>
+                                setSelectedOrder({
+                                  ...selectedOrder,
+                                  customerPhone: event.target.value,
+                                })
+                              }
                               autoFocus
                             />
                           </Form.Group>
@@ -274,7 +343,13 @@ const FormControl = () => {
                               id="Text_CustomerAdrress_edit"
                               type="text"
                               placeholder=""
-                              defaultValue={selectedOrder?.customerAddress}
+                              value={selectedOrder?.customerAddress}
+                              onChange={(event) =>
+                                setSelectedOrder({
+                                  ...selectedOrder,
+                                  customerAddress: event.target.value,
+                                })
+                              }
                               autoFocus
                             />
                           </Form.Group>
@@ -284,23 +359,52 @@ const FormControl = () => {
                               id="Text_CustomerEmail_edit"
                               type="text"
                               placeholder=""
-                              defaultValue={selectedOrder?.customerEmail}
+                              value={selectedOrder?.customerEmail}
+                              onChange={(event) =>
+                                setSelectedOrder({
+                                  ...selectedOrder,
+                                  customerEmail: event.target.value,
+                                })
+                              }
                               autoFocus
                             />
                           </Form.Group>
-                          <Form.Control
+                          {/* <Form.Control
                             style={{ width: '300px', textAlign: 'center', margin: '0px auto' }}
                             as="select"
-                            value={selectedOrder?.orderStatusName}
+                            id="Text_OrderStatusID"
+                            value={selectedOrder?.orderStatusId}
                             onChange={(event) =>
                               setSelectedOrder({
                                 ...selectedOrder,
-                                orderStatusName: event.target.value,
+                                orderStatusId: event.target.value,
                               })
                             }
                           >
                             {dataorderstatus.map((item) => (
-                              <option key={item.orderStatusId} value={item.orderStatusName}>
+                              <option key={item.orderStatusId} value={item.orderStatusID}>
+                                {item.orderStatusName}
+                              </option>
+                            ))}
+                          </Form.Control> */}
+                          <Form.Control
+                            style={{ width: '300px', textAlign: 'center', margin: '0px auto' }}
+                            as="select"
+                            id="Text_OrderStatusID"
+                            value={selectedOrder?.orderStatusId}
+                            onChange={(event) =>
+                              setSelectedOrder({
+                                ...selectedOrder,
+                                orderStatusId: event.target.value,
+                              })
+                            }
+                          >
+                            {dataorderstatus.map((item) => (
+                              <option
+                                key={item.orderStatusId}
+                                value={item.orderStatusID}
+                                selected={selectedOrder?.orderStatusId === item.orderStatusID}
+                              >
                                 {item.orderStatusName}
                               </option>
                             ))}
@@ -310,7 +414,9 @@ const FormControl = () => {
                           <Button variant="secondary" onClick={handleCloseUpdate}>
                             Đóng
                           </Button>
-                          <Button variant="primary">Thêm</Button>
+                          <Button onClick={updateOrder} variant="primary">
+                            Thêm
+                          </Button>
                         </Modal.Footer>
                       </Modal>
                     </tr>
