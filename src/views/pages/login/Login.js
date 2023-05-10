@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 import {
   CButton,
   CCard,
@@ -18,30 +19,29 @@ import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 
 const Login = () => {
-  const userName = 'Tuyenchelsea'
-  const password = 'Tuyen10a6'
+  const navigate = useNavigate()
+  const [userName, setUserName] = useState('')
+  const [password, setPassword] = useState('')
+  const [token, setToken] = useState('')
 
-  // Gọi API bằng axios
-  axios
-    .post(
-      `https://localhost:7014/api/CheckUser/CheckUser?UserName=${userName}&Password=${password}`,
-    )
-    .then((response) => {
-      // Xử lý dữ liệu trả về từ API
-      const token = response.data
+  const handleLogin = async () => {
+    try {
+      const response = await axios.get(
+        `https://localhost:7014/api/CheckUser/CheckUser?UserName=${userName}&Password=${password}`,
+      )
+
+      const token = response.data // Giả sử API trả về mã thông báo JWT trong phần body response
+      console.log(response.data)
+      alert('Đăng nhập thành công')
       localStorage.setItem('token', token)
-      console.log(token)
-      const isAuthenticated = !!localStorage.getItem('token')
-      axios.get('https://localhost:7014/api/SanPham/GetAllSanPham/10/1', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      })
-    })
-    .catch((error) => {
-      // Xử lý lỗi
+      navigate('/dashboard')
+      // Lưu mã thông báo vào state hoặc lưu trữ khác tùy thuộc vào yêu cầu của bạn
+      setToken(token)
+    } catch (error) {
+      // Xử lý lỗi khi yêu cầu API thất bại
       console.error(error)
-    })
+    }
+  }
 
   return (
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center">
@@ -58,7 +58,12 @@ const Login = () => {
                       <CInputGroupText>
                         <CIcon icon={cilUser} />
                       </CInputGroupText>
-                      <CFormInput placeholder="Username" autoComplete="username" />
+                      <CFormInput
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
+                        placeholder="Username"
+                        autoComplete="username"
+                      />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
                       <CInputGroupText>
@@ -68,11 +73,13 @@ const Login = () => {
                         type="password"
                         placeholder="Password"
                         autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                       />
                     </CInputGroup>
                     <CRow>
                       <CCol xs={6}>
-                        <CButton color="primary" className="px-4">
+                        <CButton onClick={handleLogin} color="primary" className="px-4">
                           Login
                         </CButton>
                       </CCol>
