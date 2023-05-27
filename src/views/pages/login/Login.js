@@ -24,6 +24,24 @@ const Login = () => {
   const [password, setPassword] = useState('')
   const [token, setToken] = useState('')
 
+  // const handleLogin = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `https://localhost:7014/api/CheckUser/CheckUser?UserName=${userName}&Password=${password}`,
+  //     )
+
+  //     const token = response.data // Giả sử API trả về mã thông báo JWT trong phần body response
+  //     console.log(response.data)
+  //     alert('Đăng nhập thành công')
+  //     localStorage.setItem('token', token)
+  //     navigate('/base/accordion')
+  //     // Lưu mã thông báo vào state hoặc lưu trữ khác tùy thuộc vào yêu cầu của bạn
+  //     setToken(token)
+  //   } catch (error) {
+  //     // Xử lý lỗi khi yêu cầu API thất bại
+  //     console.error(error)
+  //   }
+  // }
   const handleLogin = async () => {
     try {
       const response = await axios.get(
@@ -33,7 +51,7 @@ const Login = () => {
       const token = response.data // Giả sử API trả về mã thông báo JWT trong phần body response
       console.log(response.data)
       alert('Đăng nhập thành công')
-      localStorage.setItem('token', token)
+      sessionStorage.setItem('token', token) // Sử dụng sessionStorage thay thế localStorage
       navigate('/dashboard')
       // Lưu mã thông báo vào state hoặc lưu trữ khác tùy thuộc vào yêu cầu của bạn
       setToken(token)
@@ -59,6 +77,7 @@ const Login = () => {
                         <CIcon icon={cilUser} />
                       </CInputGroupText>
                       <CFormInput
+                        type="email"
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
                         placeholder="Username"
@@ -80,12 +99,12 @@ const Login = () => {
                     <CRow>
                       <CCol xs={6}>
                         <CButton onClick={handleLogin} color="primary" className="px-4">
-                          Login
+                          Đăng nhập
                         </CButton>
                       </CCol>
                       <CCol xs={6} className="text-right">
                         <CButton color="link" className="px-0">
-                          Forgot password?
+                          Quên mật khẩu?
                         </CButton>
                       </CCol>
                     </CRow>
