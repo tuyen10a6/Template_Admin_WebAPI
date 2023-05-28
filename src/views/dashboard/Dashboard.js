@@ -5,6 +5,8 @@ import CartImage from './../../../src/assets/images/cart/images.png'
 import doanhthu from './../../../src/assets/images/cart/tăng doanh thu.png'
 import review from './../../../src/assets/images/cart/pngtree-set-of-user-icon-user-symbol-profile-vector-outline-people-symbol-png-image_1885497.jpg'
 
+import TopBestProduct from './../../../src/assets/images/cart/download.png'
+
 import {
   CAvatar,
   CButton,
@@ -104,6 +106,32 @@ const Dashboard = () => {
         console.error('Error:', error)
       })
   }, [])
+
+  const [products, setProducts] = useState([])
+  useEffect(() => {
+    axios
+      .get('https://localhost:7014/api/SanPham/GetProductTopOrderAdmin')
+      .then((response) => {
+        setProducts(response.data)
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }, [])
+
+  const [orderStatuses, setOrderStatuses] = useState([])
+
+  useEffect(() => {
+    fetch('https://localhost:7014/api/SanPham/GetOrderStatusSummary')
+      .then((response) => response.json())
+      .then((data) => {
+        // Lưu trữ dữ liệu vào state
+        setOrderStatuses(data)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+  }, [])
   return (
     <>
       <div className="root">
@@ -143,7 +171,37 @@ const Dashboard = () => {
             </span>
           </div>
         </div>
-        <div className="ProductBestOrder"></div>
+        <div className="ProductBestOrder">
+          <h3 style={{ fontSize: '18px', color: 'blue', fontWeight: 'bold', margin: '15px' }}>
+            Sản phẩm bán chạy
+          </h3>
+          {products.slice(0, 5).map((product, index) => (
+            <div className="ProductBestItem" key={product.varriantid}>
+              <p className="index">{index + 1}</p>
+              <img src={product.imageVariant} alt={product.varrianname} />
+              <p className="ProductItemBestName">{product.varrianname}</p>
+              <p className="quantityItem">
+                <span style={{ Width: '200px' }}> |Đã bán: {product.totalQuantity}</span>{' '}
+              </p>
+              <p>
+                <img className="iconbestproduct" src={TopBestProduct}></img>
+              </p>
+            </div>
+          ))}
+        </div>
+        <h3>Thông tin trạng thái các đơn hàng</h3>
+        <div className="range">
+          {orderStatuses.map((orderStatus) => (
+            <div key={orderStatus.orderStatusID} className="range_item_receive">
+              <p style={{ color: '#e74c3c' }}>
+                {' '}
+                <p className="OrderStatusName">{orderStatus.orderStatusName}</p>
+              </p>
+              <p className="TotalOrderItem">{orderStatus.totalOrders} </p>
+              <input value={orderStatus.totalOrders} type="range" min="0" max={totalOrders}></input>
+            </div>
+          ))}
+        </div>
       </div>
     </>
   )
