@@ -90,6 +90,19 @@ const Dashboard = () => {
         console.error('Error:', error)
       })
   }, [])
+
+  const [totalPriceDay, settotalPriceDay] = useState(0)
+
+  useEffect(() => {
+    axios
+      .get('https://localhost:7014/api/SanPham/GetPriceTotalDate')
+      .then((response) => {
+        settotalPriceDay(response.data.totalRevenue)
+      })
+      .catch((error) => {
+        console.error('Error:', error)
+      })
+  }, [])
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
   }
@@ -152,7 +165,18 @@ const Dashboard = () => {
             {' '}
             <span>
               <p>
-                Doanh thu: <span>{formatCurrency(totalRevenue)}</span>
+                Doanh thu toàn bộ: <span>{formatCurrency(totalRevenue)}</span>
+              </p>{' '}
+            </span>
+            <span>
+              <img id="image_cart" src={doanhthu} alt="My Image" />
+            </span>
+          </div>
+          <div className="col-3">
+            {' '}
+            <span>
+              <p>
+                Doanh thu hôm nay: <span>{formatCurrency(totalPriceDay)}</span>
               </p>{' '}
             </span>
             <span>

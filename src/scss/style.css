@@ -18,10 +18,11 @@
   color: white;
   text-align: center;
   line-height: 90px;
-  width: 30%;
+  width: 25%;
   display: flex;
   border-radius: 10px;
   justify-content: space-around;
+  margin: 0px 5px;
 }
 #image_cart {
   height: 35px;
@@ -34,7 +35,7 @@
   color: white;
   text-align: center;
   line-height: 90px;
-  width: 30%;
+  width: 25%;
   display: flex;
   border-radius: 10px;
   justify-content: space-around;
@@ -45,7 +46,19 @@
   color: white;
   text-align: center;
   line-height: 90px;
-  width: 30%;
+  width: 25%;
+  display: flex;
+  border-radius: 10px;
+  justify-content: space-around;
+}
+
+.col-3:nth-child(4) {
+  background-color: rgba(126, 39, 172, 0.728);
+  height: 90px;
+  color: white;
+  text-align: center;
+  line-height: 90px;
+  width: 25%;
   display: flex;
   border-radius: 10px;
   justify-content: space-around;

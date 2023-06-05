@@ -42,6 +42,24 @@ const Login = () => {
   //     console.error(error)
   //   }
   // }
+  // const handleLogin = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `https://localhost:7014/api/CheckUser/CheckUser?UserName=${userName}&Password=${password}`,
+  //     )
+
+  //     const token = response.data // Giả sử API trả về mã thông báo JWT trong phần body response
+  //     console.log(response.data)
+  //     alert('Đăng nhập thành công')
+  //     sessionStorage.setItem('token', token) // Sử dụng sessionStorage thay thế localStorage
+  //     navigate('/Dashboard')
+  //     // Lưu mã thông báo vào state hoặc lưu trữ khác tùy thuộc vào yêu cầu của bạn
+  //     setToken(token)
+  //   } catch (error) {
+  //     // Xử lý lỗi khi yêu cầu API thất bại
+  //     console.error(error)
+  //   }
+  // }
   const handleLogin = async () => {
     try {
       const response = await axios.get(
@@ -52,12 +70,15 @@ const Login = () => {
       console.log(response.data)
       alert('Đăng nhập thành công')
       sessionStorage.setItem('token', token) // Sử dụng sessionStorage thay thế localStorage
-      navigate('/dashboard')
+      navigate('/Dashboard')
       // Lưu mã thông báo vào state hoặc lưu trữ khác tùy thuộc vào yêu cầu của bạn
       setToken(token)
     } catch (error) {
       // Xử lý lỗi khi yêu cầu API thất bại
       console.error(error)
+      if (error.response && error.response.status === 400) {
+        alert('Tài khoản hoặc mật khẩu không chính xác')
+      }
     }
   }
 
