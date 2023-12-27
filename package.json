@@ -39,7 +39,7 @@
     "react-app-polyfill": "^3.0.0",
     "react-bootstrap": "^2.7.2",
     "react-dom": "^18.2.0",
-    "react-icons": "^4.8.0",
+    "react-icons": "^4.12.0",
     "react-paginate": "^8.1.5",
     "react-range": "^1.8.14",
     "react-redux": "^8.0.5",

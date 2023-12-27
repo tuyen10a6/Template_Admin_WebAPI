@@ -2,6 +2,7 @@ import React from 'react'
 import Table from 'react-bootstrap/Table'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+
 import ReactPaginate from 'react-paginate'
 import './../../../scss/_Order.scss'
 import Button from 'react-bootstrap/Button'
@@ -9,6 +10,7 @@ import Modal from 'react-bootstrap/Modal'
 import Form from 'react-bootstrap/Form'
 // Import Icon
 import { GrUpdate } from 'react-icons/gr'
+import { FaPrint } from 'react-icons/fa6'
 import {
   CButton,
   CCard,
@@ -222,7 +224,6 @@ const FormControl = () => {
                       >
                         Xem chi tiết
                       </td>
-
                       <Modal
                         style={{ background: 'none' }}
                         show={showSecond}
@@ -270,7 +271,6 @@ const FormControl = () => {
                           </Button>
                         </Modal.Footer>
                       </Modal>
-
                       <td
                         onClick={() => {
                           setSelectedOrder(order)
@@ -279,8 +279,8 @@ const FormControl = () => {
                         style={{ textAlign: 'center' }}
                       >
                         <GrUpdate />
+                        <FaPrint />
                       </td>
-
                       <Modal
                         style={{ background: 'none' }}
                         show={showUpdate}
