@@ -9,7 +9,7 @@ import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import Form from 'react-bootstrap/Form'
 // Import Icon
-import { GrUpdate } from 'react-icons/gr'
+import { GrUpdate, GrWifiNone } from 'react-icons/gr'
 import { FaPrint } from 'react-icons/fa6'
 import {
   CButton,
@@ -36,6 +36,75 @@ const FormControl = () => {
   const handlePageClick = ({ selected: selectedPage }) => {
     setCurrentPage(selectedPage)
   }
+
+  // Print
+  const printOrder = (orderId) => {
+    axios
+      .get(`https://localhost:7014/api/Order/GetOrderById/${orderId}`)
+      .then((response) => {
+        const orderData = response.data
+        console.log(orderData)
+
+        const printWindow = window.open('', '_blank')
+        const currentDate = new Date()
+        const formatCurrentDate = currentDate.toLocaleDateString('vi-VN')
+
+        printWindow.document.write('<html><head><title></title>')
+        printWindow.document.write('<style>')
+        printWindow.document.write(
+          'th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }',
+        )
+        printWindow.document.write('</style></head><body>')
+        printWindow.document.write('<div style="padding: 20px;">')
+        printWindow.document.write('<h1 style="text-align: center;">HOÁ ĐƠN BÁN HÀNG CLICKBUY</h1>')
+        printWindow.document.write(
+          '<span style="float: left; margin-bottom: 15px"> Ngày tạo: ' +
+            formatCurrentDate +
+            '</span>',
+        )
+
+        // Kiểm tra xem có thông tin đơn hàng không
+        if (orderData && orderData.OrderDetails) {
+          // Render thông tin đơn hàng vào bảng
+          printWindow.document.write('<table style="width:100%;"> <tr>')
+          printWindow.document.write('<th>Tên sản phẩm</th>')
+          printWindow.document.write('<th>Đơn giá</th>')
+          printWindow.document.write('<th>Số lượng</th>')
+          printWindow.document.write('<th>Tổng tiền</th>')
+          printWindow.document.write('</tr>')
+
+          // Lặp qua từng sản phẩm trong đơn hàng và thêm vào bảng
+          orderData.orderDetails.forEach((orderDetail) => {
+            printWindow.document.write(' <tr>')
+            printWindow.document.write('<td>' + orderDetail.varrianname + '</td>')
+            printWindow.document.write('<td>' + orderDetail.price + '</td>')
+            printWindow.document.write('<td>' + orderDetail.quantity + '</td>')
+            printWindow.document.write('<td>' + orderDetail.quantity * orderDetail.price + '</td>')
+            printWindow.document.write('</tr>')
+          })
+
+          // Kết thúc bảng
+          printWindow.document.write('</table>')
+        } else {
+          // Thông báo nếu không có thông tin đơn hàng
+          printWindow.document.write('<p>Không có thông tin đơn hàng.</p>')
+        }
+
+        // Kết thúc nội dung và mở cửa sổ in
+        printWindow.document.write('</div></body></html>')
+        printWindow.document.close()
+
+        // Chờ nội dung được tải hoàn chỉnh trước khi in
+        printWindow.onload = function () {
+          printWindow.print()
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching order data:', error)
+        // Xử lý lỗi khi gọi API
+      })
+  }
+
   const fetchOrders = async () => {
     try {
       const response = await axios.get('https://localhost:7014/api/Order/GetAllOrderAdmin')
@@ -103,13 +172,6 @@ const FormControl = () => {
     const customerAddress = document.getElementById('Text_CustomerAdrress_edit').value
     const customerEmail = document.getElementById('Text_CustomerEmail_edit').value
     const orderStatusID = document.getElementById('Text_OrderStatusID').value
-    console.log(orderID)
-    console.log(customerID)
-    console.log(customerName)
-    console.log(customerPhone)
-    console.log(customerAddress)
-    console.log(customerEmail)
-    console.log(orderStatusID)
 
     const data = {
       orderID,
@@ -271,16 +333,21 @@ const FormControl = () => {
                           </Button>
                         </Modal.Footer>
                       </Modal>
-                      <td
-                        onClick={() => {
-                          setSelectedOrder(order)
-                          handleOpenUpdate()
-                        }}
-                        style={{ textAlign: 'center' }}
-                      >
-                        <GrUpdate />
-                        <FaPrint />
+                      <td style={{ textAlign: 'center' }}>
+                        <GrUpdate
+                          onClick={() => {
+                            setSelectedOrder(order)
+                            handleOpenUpdate()
+                          }}
+                        />
+                        <FaPrint
+                          onClick={() => {
+                            printOrder(order.orderID)
+                          }}
+                          style={{ marginLeft: '10px' }}
+                        />
                       </td>
+
                       <Modal
                         style={{ background: 'none' }}
                         show={showUpdate}
@@ -369,24 +436,6 @@ const FormControl = () => {
                               autoFocus
                             />
                           </Form.Group>
-                          {/* <Form.Control
-                            style={{ width: '300px', textAlign: 'center', margin: '0px auto' }}
-                            as="select"
-                            id="Text_OrderStatusID"
-                            value={selectedOrder?.orderStatusId}
-                            onChange={(event) =>
-                              setSelectedOrder({
-                                ...selectedOrder,
-                                orderStatusId: event.target.value,
-                              })
-                            }
-                          >
-                            {dataorderstatus.map((item) => (
-                              <option key={item.orderStatusId} value={item.orderStatusID}>
-                                {item.orderStatusName}
-                              </option>
-                            ))}
-                          </Form.Control> */}
                           <Form.Control
                             style={{ width: '300px', textAlign: 'center', margin: '0px auto' }}
                             as="select"

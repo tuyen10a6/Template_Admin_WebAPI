@@ -67,7 +67,7 @@ const Login = () => {
       )
 
       const token = response.data // Giả sử API trả về mã thông báo JWT trong phần body response
-      console.log(response.data)
+
       alert('Đăng nhập thành công')
       sessionStorage.setItem('token', token) // Sử dụng sessionStorage thay thế localStorage
       navigate('/Dashboard')
@@ -75,9 +75,11 @@ const Login = () => {
       setToken(token)
     } catch (error) {
       // Xử lý lỗi khi yêu cầu API thất bại
-      console.error(error)
-      if (error.response && error.response.status === 400) {
+      if (error.response && error.response.status === 404) {
         alert('Tài khoản hoặc mật khẩu không chính xác')
+      }
+      if (error.response && error.response.status === 400) {
+        alert('Vui lòng nhập thông tin đăng nhập')
       }
     }
   }
