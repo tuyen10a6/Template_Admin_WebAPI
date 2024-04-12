@@ -2,158 +2,127 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
-import {
-  CButton,
-  CCard,
-  CCardBody,
-  CCardGroup,
-  CCol,
-  CContainer,
-  CForm,
-  CFormInput,
-  CInputGroup,
-  CInputGroupText,
-  CRow,
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-import { cilLockLocked, cilUser } from '@coreui/icons'
 
 const Login = () => {
-  const navigate = useNavigate()
-  const [userName, setUserName] = useState('')
+  const [email, setemail] = useState('')
   const [password, setPassword] = useState('')
-  const [token, setToken] = useState('')
+  const [error, setError] = useState(null)
 
-  // const handleLogin = async () => {
-  //   try {
-  //     const response = await axios.get(
-  //       `https://localhost:7014/api/CheckUser/CheckUser?UserName=${userName}&Password=${password}`,
-  //     )
+  const navigate = useNavigate()
+  const handleLogin = () => {
+    if (email !== '' && password !== '') {
+      // Gọi API đăng nhập
+      fetch('http://localhost:3000/v1/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Đăng nhập không thành công')
+          }
+          return response.json()
+        })
+        .then((data) => {
+          // Lưu token vào Local Storage
+          localStorage.setItem('token', data.access_token)
+          navigate('/Dashboard')
 
-  //     const token = response.data // Giả sử API trả về mã thông báo JWT trong phần body response
-  //     console.log(response.data)
-  //     alert('Đăng nhập thành công')
-  //     localStorage.setItem('token', token)
-  //     navigate('/base/accordion')
-  //     // Lưu mã thông báo vào state hoặc lưu trữ khác tùy thuộc vào yêu cầu của bạn
-  //     setToken(token)
-  //   } catch (error) {
-  //     // Xử lý lỗi khi yêu cầu API thất bại
-  //     console.error(error)
-  //   }
-  // }
-  // const handleLogin = async () => {
-  //   try {
-  //     const response = await axios.get(
-  //       `https://localhost:7014/api/CheckUser/CheckUser?UserName=${userName}&Password=${password}`,
-  //     )
-
-  //     const token = response.data // Giả sử API trả về mã thông báo JWT trong phần body response
-  //     console.log(response.data)
-  //     alert('Đăng nhập thành công')
-  //     sessionStorage.setItem('token', token) // Sử dụng sessionStorage thay thế localStorage
-  //     navigate('/Dashboard')
-  //     // Lưu mã thông báo vào state hoặc lưu trữ khác tùy thuộc vào yêu cầu của bạn
-  //     setToken(token)
-  //   } catch (error) {
-  //     // Xử lý lỗi khi yêu cầu API thất bại
-  //     console.error(error)
-  //   }
-  // }
-  const handleLogin = async () => {
-    try {
-      const response = await axios.get(
-        `https://localhost:7014/api/CheckUser/CheckUser?UserName=${userName}&Password=${password}`,
-      )
-
-      const token = response.data // Giả sử API trả về mã thông báo JWT trong phần body response
-
-      alert('Đăng nhập thành công')
-      sessionStorage.setItem('token', token) // Sử dụng sessionStorage thay thế localStorage
-      navigate('/Dashboard')
-      // Lưu mã thông báo vào state hoặc lưu trữ khác tùy thuộc vào yêu cầu của bạn
-      setToken(token)
-    } catch (error) {
-      // Xử lý lỗi khi yêu cầu API thất bại
-      if (error.response && error.response.status === 404) {
-        alert('Tài khoản hoặc mật khẩu không chính xác')
-      }
-      if (error.response && error.response.status === 400) {
-        alert('Vui lòng nhập thông tin đăng nhập')
-      }
+          console.log(data)
+          setError(null)
+          // Redirect hoặc thực hiện các hành động khác sau khi đăng nhập thành công
+        })
+        .catch((error) => {
+          console.error('Đăng nhập không thành công:', error)
+          setError('Đăng nhập không thành công. Vui lòng kiểm tra lại tên người dùng và mật khẩu.')
+        })
+    } else {
+      setError('Vui lòng nhập tên người dùng và mật khẩu.')
     }
   }
 
   return (
-    <div className="bg-light min-vh-100 d-flex flex-row align-items-center">
-      <CContainer>
-        <CRow className="justify-content-center">
-          <CCol md={8}>
-            <CCardGroup>
-              <CCard className="p-4">
-                <CCardBody>
-                  <CForm>
-                    <h1>Đăng Nhập</h1>
-                    <p className="text-medium-emphasis">Sign In to your account</p>
-                    <CInputGroup className="mb-3">
-                      <CInputGroupText>
-                        <CIcon icon={cilUser} />
-                      </CInputGroupText>
-                      <CFormInput
-                        type="email"
-                        value={userName}
-                        onChange={(e) => setUserName(e.target.value)}
-                        placeholder="Username"
-                        autoComplete="username"
-                      />
-                    </CInputGroup>
-                    <CInputGroup className="mb-4">
-                      <CInputGroupText>
-                        <CIcon icon={cilLockLocked} />
-                      </CInputGroupText>
-                      <CFormInput
-                        type="password"
-                        placeholder="Password"
-                        autoComplete="current-password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                      />
-                    </CInputGroup>
-                    <CRow>
-                      <CCol xs={6}>
-                        <CButton onClick={handleLogin} color="primary" className="px-4">
-                          Đăng nhập
-                        </CButton>
-                      </CCol>
-                      <CCol xs={6} className="text-right">
-                        <CButton color="link" className="px-0">
-                          Quên mật khẩu?
-                        </CButton>
-                      </CCol>
-                    </CRow>
-                  </CForm>
-                </CCardBody>
-              </CCard>
-              <CCard className="text-white bg-primary py-5" style={{ width: '44%' }}>
-                <CCardBody className="text-center">
-                  <div>
-                    <h2>Sign up</h2>
-                    <p>
-                      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                      tempor incididunt ut labore et dolore magna aliqua.
-                    </p>
-                    <Link to="/register">
-                      <CButton color="primary" className="mt-3" active tabIndex={-1}>
-                        Register Now!
-                      </CButton>
-                    </Link>
-                  </div>
-                </CCardBody>
-              </CCard>
-            </CCardGroup>
-          </CCol>
-        </CRow>
-      </CContainer>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+      }}
+    >
+      <h2
+        style={{
+          fontFamily: 'Arial, sans-serif',
+          fontSize: '24px',
+          fontWeight: 'bold',
+          marginBottom: '20px',
+        }}
+      >
+        ĐĂNG NHẬP ADMIN ĐẶT VÉ XEM PHIM
+      </h2>
+      {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
+      <div style={{ marginBottom: '10px' }}>
+        <label
+          style={{
+            marginBottom: '5px',
+            marginRight: '10px',
+          }}
+        >
+          Tên người dùng
+        </label>
+        <input
+          type="text"
+          value={email}
+          onChange={(e) => setemail(e.target.value)}
+          style={{
+            padding: '8px',
+            borderRadius: '5px',
+            border: '1px solid #ccc',
+            width: '200px',
+          }}
+        />
+      </div>
+      <div style={{ marginBottom: '10px' }}>
+        <label
+          style={{
+            marginBottom: '5px',
+            marginRight: '50px',
+          }}
+        >
+          Mật khẩu:
+        </label>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={{
+            padding: '8px',
+            borderRadius: '5px',
+            border: '1px solid #ccc',
+            width: '200px',
+          }}
+        />
+      </div>
+      <button
+        type="button"
+        onClick={handleLogin}
+        style={{
+          padding: '10px 20px',
+          backgroundColor: '#007bff',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          fontFamily: 'Arial, sans-serif',
+          fontSize: '16px',
+          fontWeight: 'bold',
+        }}
+      >
+        Đăng nhập
+      </button>
     </div>
   )
 }

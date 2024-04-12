@@ -20,11 +20,6 @@ const Spinners = React.lazy(() => import('./views/base/spinners/Spinners'))
 const Tables = React.lazy(() => import('./views/base/tables/Tables'))
 const Tooltips = React.lazy(() => import('./views/base/tooltips/Tooltips'))
 
-// Buttons
-const Buttons = React.lazy(() => import('./views/buttons/buttons/Buttons'))
-const ButtonGroups = React.lazy(() => import('./views/buttons/button-groups/ButtonGroups'))
-const Dropdowns = React.lazy(() => import('./views/buttons/dropdowns/Dropdowns'))
-
 //Forms
 const ChecksRadios = React.lazy(() => import('./views/forms/checks-radios/ChecksRadios'))
 const FloatingLabels = React.lazy(() => import('./views/forms/floating-labels/FloatingLabels'))
@@ -34,8 +29,15 @@ const Range = React.lazy(() => import('./views/forms/range/Range'))
 const Select = React.lazy(() => import('./views/forms/select/Select'))
 const Validation = React.lazy(() => import('./views/forms/validation/Validation'))
 
+// Phim
+
+const Phim = React.lazy(() => import('./views/phim/Phim'))
+
 const Charts = React.lazy(() => import('./views/charts/Charts'))
 
+const Lichchieu = React.lazy(() => import('./views/lichchieu/Lichchieu'))
+
+const Datve = React.lazy(() => import('./views/datve/Datve'))
 // Icons
 const CoreUIIcons = React.lazy(() => import('./views/icons/coreui-icons/CoreUIIcons'))
 const Flags = React.lazy(() => import('./views/icons/flags/Flags'))
@@ -70,11 +72,11 @@ const routes = [
   { path: '/Base/spinners', name: 'Spinners', element: Spinners },
   { path: '/Base/tables', name: 'Tables', element: Tables },
   { path: '/Base/tooltips', name: 'Tooltips', element: Tooltips },
-  { path: '/buttons', name: 'Buttons', element: Buttons, exact: true },
-  { path: '/buttons/buttons', name: 'Buttons', element: Buttons },
-  { path: '/buttons/dropdowns', name: 'Dropdowns', element: Dropdowns },
-  { path: '/buttons/button-groups', name: 'Button Groups', element: ButtonGroups },
+
+  { path: '/phim', name: 'Phim', element: Phim },
+  { path: '/lichchieu', name: 'Lichchieu', element: Lichchieu },
   { path: '/charts', name: 'Charts', element: Charts },
+  { path: '/datve', name: 'datve', element: Datve },
   { path: '/forms', name: 'Forms', element: FormControl, exact: true },
   { path: '/forms/form-control', name: 'Form Control', element: FormControl },
   { path: '/forms/select', name: 'Select', element: Select },

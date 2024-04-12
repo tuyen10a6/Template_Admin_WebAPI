@@ -10,7 +10,7 @@ const AppFooter = () => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          CLICKBUY
+          ADMIN
         </a>
       </div>
       <div className="ms-auto">
@@ -20,7 +20,7 @@ const AppFooter = () => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          &amp; PHẠM XUÂN TUYỂN
+          &amp; ADMIN
         </a>
       </div>
     </CFooter>

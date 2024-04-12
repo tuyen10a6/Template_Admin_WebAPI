@@ -1,234 +1,152 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
-import axios from 'axios'
-import CartImage from './../../../src/assets/images/cart/images.png'
-import doanhthu from './../../../src/assets/images/cart/tăng doanh thu.png'
-import review from './../../../src/assets/images/cart/pngtree-set-of-user-icon-user-symbol-profile-vector-outline-people-symbol-png-image_1885497.jpg'
-
-import TopBestProduct from './../../../src/assets/images/cart/download.png'
-
-import {
-  CAvatar,
-  CButton,
-  CButtonGroup,
-  CCard,
-  CCardBody,
-  CCardFooter,
-  CCardHeader,
-  CCol,
-  CProgress,
-  CRow,
-  CTable,
-  CTableBody,
-  CTableDataCell,
-  CTableHead,
-  CTableHeaderCell,
-  CTableRow,
-} from '@coreui/react'
-import { CChartLine } from '@coreui/react-chartjs'
-import { getStyle, hexToRgba } from '@coreui/utils'
-import CIcon from '@coreui/icons-react'
-import {
-  cibCcAmex,
-  cibCcApplePay,
-  cibCcMastercard,
-  cibCcPaypal,
-  cibCcStripe,
-  cibCcVisa,
-  cibGoogle,
-  cibFacebook,
-  cibLinkedin,
-  cifBr,
-  cifEs,
-  cifFr,
-  cifIn,
-  cifPl,
-  cifUs,
-  cibTwitter,
-  cilCloudDownload,
-  cilPeople,
-  cilUser,
-  cilUserFemale,
-} from '@coreui/icons'
-
-import avatar1 from 'src/assets/images/avatars/1.jpg'
-import avatar2 from 'src/assets/images/avatars/2.jpg'
-import avatar3 from 'src/assets/images/avatars/3.jpg'
-import avatar4 from 'src/assets/images/avatars/4.jpg'
-import avatar5 from 'src/assets/images/avatars/5.jpg'
-import avatar6 from 'src/assets/images/avatars/6.jpg'
-import './../../scss/style.css'
-
-import WidgetsBrand from '../widgets/WidgetsBrand'
-import WidgetsDropdown from '../widgets/WidgetsDropdown'
 
 const Dashboard = () => {
-  const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
-  const [totalOrders, setTotalOrders] = useState(0)
-
+  const [danhMuc, setDanhMuc] = useState([])
+  const [newLoaiPhim, setNewLoaiPhim] = useState('')
+  const [editingId, setEditingId] = useState(null)
+  const [editingLoaiPhim, setEditingLoaiPhim] = useState('')
+  const token = localStorage.getItem('token')
   useEffect(() => {
-    axios
-      .get('https://localhost:7014/api/SanPham/ToTalQuantityOrder')
-      .then((response) => {
-        const data = response.data
-        setTotalOrders(data.totalOrders)
-      })
-      .catch((error) => {
-        console.error('Error:', error)
-      })
+    fetch('http://localhost:3000/v1/api/danhmuc')
+      .then((response) => response.json())
+      .then((data) => setDanhMuc(data.data))
+      .catch((error) => console.error('Error fetching danh muc:', error))
   }, [])
 
-  const [totalRevenue, setTotalRevenue] = useState(0)
-
-  useEffect(() => {
-    axios
-      .get('https://localhost:7014/api/SanPham/TotalPriceOrder')
-      .then((response) => {
-        setTotalRevenue(response.data.totalRevenue)
-      })
-      .catch((error) => {
-        console.error('Error:', error)
-      })
-  }, [])
-
-  const [totalPriceDay, settotalPriceDay] = useState(0)
-
-  useEffect(() => {
-    axios
-      .get('https://localhost:7014/api/SanPham/GetPriceTotalDate')
-      .then((response) => {
-        settotalPriceDay(response.data.totalRevenue)
-      })
-      .catch((error) => {
-        console.error('Error:', error)
-      })
-  }, [])
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
-  }
-
-  const [totalReviewOrder, setTotalReviewOrder] = useState(0)
-
-  useEffect(() => {
-    axios
-      .get('https://localhost:7014/api/SanPham/ToTalReviewAllProduct')
-      .then((response) => {
-        setTotalReviewOrder(response.data.toTalReviewOrder)
-      })
-      .catch((error) => {
-        console.error('Error:', error)
-      })
-  }, [])
-
-  const [products, setProducts] = useState([])
-  useEffect(() => {
-    axios
-      .get('https://localhost:7014/api/SanPham/GetProductTopOrderAdmin')
-      .then((response) => {
-        setProducts(response.data)
-      })
-      .catch((error) => {
-        console.log(error)
-      })
-  }, [])
-
-  const [orderStatuses, setOrderStatuses] = useState([])
-
-  useEffect(() => {
-    fetch('https://localhost:7014/api/SanPham/GetOrderStatusSummary')
+  const handleAddLoaiPhim = () => {
+    fetch('http://localhost:3000/v1/api/addDanhMuc', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ loai_phim: newLoaiPhim, image: 'image.jpg' }),
+    })
       .then((response) => response.json())
       .then((data) => {
-        // Lưu trữ dữ liệu vào state
-        setOrderStatuses(data)
+        console.log('Loại phim đã được thêm vào thành công:', data)
+        setDanhMuc([...danhMuc, data.data]) // Thêm loại phim mới vào danh sách hiện tại
+        setNewLoaiPhim('') // Xóa nội dung input
       })
-      .catch((error) => {
-        console.error(error)
+      .catch((error) => console.error('Lỗi khi thêm loại phim:', error))
+  }
+
+  const handleEdit = (id, loaiPhim) => {
+    setEditingId(id)
+    setEditingLoaiPhim(loaiPhim)
+  }
+
+  const handleUpdateLoaiPhim = () => {
+    fetch(`http://localhost:3000/v1/api/updateDanhMuc/${editingId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ loai_phim: editingLoaiPhim }),
+    })
+      .then(() => {
+        const updatedDanhMuc = danhMuc.map((item) =>
+          item.id === editingId ? { ...item, loai_phim: editingLoaiPhim } : item,
+        )
+        setDanhMuc(updatedDanhMuc)
+        setEditingId(null)
+        setEditingLoaiPhim('')
       })
-  }, [])
+      .catch((error) => console.error('Error updating loai phim:', error))
+  }
+
+  const handleDelete = (id) => {
+    fetch(`http://localhost:3000/v1/api/deleteDanhMuc/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(() => {
+        const updatedDanhMuc = danhMuc.filter((item) => item.id !== id)
+        setDanhMuc(updatedDanhMuc)
+      })
+      .catch((error) => console.error('Error deleting loai phim:', error))
+  }
+
   return (
-    <>
-      <div className="root">
-        <div>
-          <h3 className="title">THỐNG KÊ DOANH THU</h3>
-        </div>
-        <div className="col-9">
-          <div className="col-3">
-            {' '}
-            <span>
-              Tổng số đơn hàng: <span>{totalOrders}</span>
-            </span>
-            <span>
-              <img id="image_cart" src={CartImage} alt="My Image" />
-            </span>
-          </div>
-          <div className="col-3">
-            {' '}
-            <span>
-              <p>
-                Doanh thu toàn bộ: <span>{formatCurrency(totalRevenue)}</span>
-              </p>{' '}
-            </span>
-            <span>
-              <img id="image_cart" src={doanhthu} alt="My Image" />
-            </span>
-          </div>
-          <div className="col-3">
-            {' '}
-            <span>
-              <p>
-                Doanh thu hôm nay: <span>{formatCurrency(totalPriceDay)}</span>
-              </p>{' '}
-            </span>
-            <span>
-              <img id="image_cart" src={doanhthu} alt="My Image" />
-            </span>
-          </div>
-          <div className="col-3">
-            {' '}
-            <span>
-              <p>
-                Lượt đánh giá: <span>{totalReviewOrder}</span>
-              </p>{' '}
-            </span>
-            <span>
-              <img id="image_cart" src={review} alt="My Image" />
-            </span>
-          </div>
-        </div>
-        <div className="ProductBestOrder">
-          <h3 style={{ fontSize: '18px', color: 'blue', fontWeight: 'bold', margin: '15px' }}>
-            Sản phẩm bán chạy
-          </h3>
-          {products.slice(0, 5).map((product, index) => (
-            <div className="ProductBestItem" key={product.varriantid}>
-              <p className="index">{index + 1}</p>
-              <img src={product.imageVariant} alt={product.varrianname} />
-              <p className="ProductItemBestName">{product.varrianname}</p>
-              <p className="quantityItem">
-                <span style={{ Width: '200px' }}> |Đã bán: {product.totalQuantity}</span>{' '}
-              </p>
-              <p>
-                <img className="iconbestproduct" src={TopBestProduct}></img>
-              </p>
-            </div>
-          ))}
-        </div>
-        <h3>Thông tin trạng thái các đơn hàng</h3>
-        <div className="range">
-          {orderStatuses.map((orderStatus) => (
-            <div key={orderStatus.orderStatusID} className="range_item_receive">
-              <p style={{ color: '#e74c3c' }}>
-                {' '}
-                <p className="OrderStatusName">{orderStatus.orderStatusName}</p>
-              </p>
-              <p className="TotalOrderItem">{orderStatus.totalOrders} </p>
-              <input value={orderStatus.totalOrders} type="range" min="0" max={totalOrders}></input>
-            </div>
-          ))}
-        </div>
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+      <h1>Danh sách các loại phim</h1>
+      <div>
+        <input
+          type="text"
+          value={newLoaiPhim}
+          onChange={(e) => setNewLoaiPhim(e.target.value)}
+          style={inputStyle}
+        />
+        <button style={{ marginLeft: '20px' }} onClick={handleAddLoaiPhim}>
+          Thêm
+        </button>
       </div>
-    </>
+      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
+        <thead>
+          <tr>
+            <th style={tableHeaderStyle}>ID</th>
+            <th style={tableHeaderStyle}>Loại Phim</th>
+            <th style={tableHeaderStyle}>Thao Tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          {danhMuc.map((item) => (
+            <tr key={item.id} style={tableRowStyle}>
+              <td style={tableCellStyle}>{item.id}</td>
+              <td style={tableCellStyle}>
+                {editingId === item.id ? (
+                  <input
+                    type="text"
+                    value={editingLoaiPhim}
+                    onChange={(e) => setEditingLoaiPhim(e.target.value)}
+                    style={inputStyle}
+                  />
+                ) : (
+                  item.loai_phim
+                )}
+              </td>
+              <td style={tableCellStyle}>
+                {editingId === item.id ? (
+                  <button onClick={handleUpdateLoaiPhim}>Lưu</button>
+                ) : (
+                  <button onClick={() => handleEdit(item.id, item.loai_phim)}>Sửa</button>
+                )}
+                <button style={{ marginLeft: '20px' }} onClick={() => handleDelete(item.id)}>
+                  Xoá
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
+}
+
+const tableHeaderStyle = {
+  background: '#333',
+  color: '#fff',
+  padding: '10px',
+  textAlign: 'left',
+}
+
+const tableRowStyle = {
+  borderBottom: '1px solid #ccc',
+}
+
+const tableCellStyle = {
+  padding: '10px',
+}
+
+const inputStyle = {
+  padding: '8px',
+  borderRadius: '4px',
+  border: '1px solid #ccc',
 }
 
 export default Dashboard
